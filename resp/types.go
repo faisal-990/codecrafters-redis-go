@@ -1,0 +1,39 @@
+package resp
+
+import "fmt"
+
+// Command represents a parsed Redis command
+type Command struct {
+	Name string
+	Args []string
+}
+
+// Resp interface for all response types
+type Resp interface {
+	ToRESP() string
+}
+
+// BulkString implementation
+type BulkString struct{ V *string }
+
+func (b BulkString) ToRESP() string {
+	if b.V == nil {
+		return "$-1\r\n"
+	}
+	return fmt.Sprintf("$%d\r\n%s\r\n", len(*b.V), *b.V)
+}
+
+// SimpleString implementation
+type SimpleString struct{ V *string }
+
+func (s SimpleString) ToRESP() string {
+	if s.V == nil {
+		return "+OK\r\n"
+	}
+	return fmt.Sprintf("+%s\r\n", *s.V)
+}
+
+// RespError for errors
+type RespError string
+
+func (e RespError) ToRESP() string { return "-" + string(e) + "\r\n" }
