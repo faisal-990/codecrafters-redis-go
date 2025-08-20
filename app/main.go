@@ -41,6 +41,12 @@ type Handler func(cmd *Command) Resp
 // ---------- command registry (extend here) ----------
 var cmdTable = map[string]Handler{
 	"ECHO": echoHandler,
+	"PING": pingHandler,
+}
+
+func pingHandler(cmd *Command) Resp {
+	str := "PONG"
+	return BulkString{V: &str}
 }
 
 func echoHandler(cmd *Command) Resp {
