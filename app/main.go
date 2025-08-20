@@ -204,7 +204,7 @@ func StartServer(addr string) error {
 }
 
 func main() {
-	addr := ":6380"
+	addr := ":6379"
 	fmt.Println("listening on", addr)
 	if err := StartServer(addr); err != nil {
 		fmt.Println("server error:", err)
