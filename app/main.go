@@ -35,6 +35,15 @@ type RespError string
 
 func (e RespError) ToRESP() string { return "-" + string(e) + "\r\n" }
 
+type SimpleString struct{ V *string }
+
+func (s SimpleString) ToRESP() string {
+	if s.V == nil {
+		return fmt.Sprintf("+OK\r\n")
+	}
+	return fmt.Sprintf("+%s\r\n", *s.V)
+}
+
 // Handler signature
 type Handler func(cmd *Command) Resp
 
@@ -46,7 +55,7 @@ var cmdTable = map[string]Handler{
 
 func pingHandler(cmd *Command) Resp {
 	str := "PONG"
-	return BulkString{V: &str}
+	return SimpleString{V: &str}
 }
 
 func echoHandler(cmd *Command) Resp {
