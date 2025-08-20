@@ -170,16 +170,16 @@ func handleConnection(conn net.Conn) {
 		w.WriteString(dispatch(cmd).ToRESP())
 
 		// handle any other complete commands already buffered (pipelining)
-		for r.Buffered() > 0 {
-			cmd2, err := parseCommand(r)
-			if err != nil {
-				// protocol error for the pipelined command -> return an error reply and stop draining
-				w.WriteString(RespError(fmt.Sprintf("ERR %v", err)).ToRESP())
-				break
-			}
-			w.WriteString(dispatch(cmd2).ToRESP())
-		}
-
+		//for r.Buffered() > 0 {
+		//cmd2, err := parseCommand(r)
+		//if err != nil {
+		//// protocol error for the pipelined command -> return an error reply and stop draining
+		//w.WriteString(RespError(fmt.Sprintf("ERR %v", err)).ToRESP())
+		//break
+		//}
+		//w.WriteString(dispatch(cmd2).ToRESP())
+		//}
+		//
 		w.Flush()
 	}
 }
@@ -204,7 +204,7 @@ func StartServer(addr string) error {
 }
 
 func main() {
-	addr := ":6379"
+	addr := ":6380"
 	fmt.Println("listening on", addr)
 	if err := StartServer(addr); err != nil {
 		fmt.Println("server error:", err)
