@@ -13,8 +13,8 @@ func readLine(r *bufio.Reader) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	s = strings.TrimSuffix(s, "\n")
-	s = strings.TrimSuffix(s, "\r")
+	// Properly trim only the CRLF
+	s = strings.TrimSuffix(s, "\r\n")
 	return s, nil
 }
 
