@@ -1,6 +1,10 @@
 package command
 
 import (
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/codecrafters-io/redis-starter-go/db"
 	"github.com/codecrafters-io/redis-starter-go/resp"
 )
@@ -19,9 +23,25 @@ func PingHandler(cmd *resp.Command) resp.Resp {
 }
 
 func SetHandler(cmd *resp.Command) resp.Resp {
-	err := db.Instance.Set(cmd.Args[0], cmd.Args[1])
+	key := cmd.Args[0]
+	value := cmd.Args[1]
+	var timeout time.Duration
+	// now parsing the flags which are optional
+	if len(cmd.Args) > 2 {
+		flag := strings.ToUpper(cmd.Args[2])
+		if flag == "PX" {
+			ms, err := strconv.Atoi(cmd.Args[3])
+			if err != nil {
+				return resp.RespError("ERR - invalid time format")
+			}
+			timeout = time.Duration(ms) * time.Millisecond
+
+		}
+
+	}
+	err := db.Instance.Set(key, value, timeout)
 	if err != nil {
-		return resp.RespError("ERR - Failed to set the key value pair")
+		return resp.RespError("Err - not able to store in databse")
 	}
 	// when V field of simple string response is passed as nil
 	// the response that simple string sends in +OK, if some string is passed
@@ -31,12 +51,13 @@ func SetHandler(cmd *resp.Command) resp.Resp {
 
 func GetHandler(cmd *resp.Command) resp.Resp {
 	value, err := db.Instance.Get(cmd.Args[0])
-	if err != nil {
-		return resp.RespError("ERR- failed to get the value using the key")
-	}
+
 	if value == "" {
 		// in case the key doesn't exist in the memory return a null bulk string
 		return resp.BulkString{V: nil}
+	}
+	if err != nil {
+		return resp.RespError("ERR- failed to get the value using the key")
 	}
 	return resp.BulkString{V: &(value)}
 }

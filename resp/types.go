@@ -9,6 +9,7 @@ type Command struct {
 }
 
 // Resp interface for all response types
+// ToRESP method prepares the response in the resp protocol format
 type Resp interface {
 	ToRESP() string
 }
