@@ -1,7 +1,6 @@
 package command
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -64,7 +63,7 @@ func GetHandler(cmd *resp.Command) resp.Resp {
 }
 
 func RpushHandler(cmd *resp.Command) resp.Resp {
-	key := cmd.Args[1]
+	key := cmd.Args[0]
 	values := cmd.Args[1:]
 
 	length, err := db.Instance.Rpush(key, values)
@@ -74,5 +73,5 @@ func RpushHandler(cmd *resp.Command) resp.Resp {
 		}
 		return resp.RespError(err.Error())
 	}
-	return resp.Integer(fmt.Sprintf("%d", length))
+	return resp.Integer(strconv.Itoa(length))
 }

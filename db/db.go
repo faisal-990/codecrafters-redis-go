@@ -9,7 +9,7 @@ import (
 type Storage interface {
 	Set(key, value string, ttl time.Duration) error
 	Get(key string) (string, error)
-	Rpush(key, value string) (int, error)
+	Rpush(key string, value []string) (int, error)
 }
 
 // entry represents a single key's value + expiration (for string keys)
