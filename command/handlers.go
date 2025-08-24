@@ -88,9 +88,13 @@ func LrangeHandler(cmd *resp.Command) resp.Resp {
 	}
 
 	values, err := db.Instance.Lrange(key, start, stop)
-	if err != nil {
-		return resp.RespError(err.Error())
+	if len(values) == 0 {
+		// no elements found for what is being queried ,return a simple empty array
+		return resp.RespArray{V: []resp.Resp{}}
 	}
+	//if err != nil {
+	//return resp.RespError(err.Error())
+	//}
 
 	// convert []string -> []Resp (BulkString)
 	arr := make([]resp.Resp, len(values))

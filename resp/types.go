@@ -1,6 +1,9 @@
 package resp
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // Command represents a parsed Redis command
 type Command struct {
@@ -50,9 +53,10 @@ type RespArray struct {
 }
 
 func (r RespArray) ToRESP() string {
-	s := fmt.Sprintf("*%d\r\n", len(r.V))
-	for _, v := range r.V {
-		s += v.ToRESP()
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("*%d\r\n", len(r.V)))
+	for _, item := range r.V {
+		sb.WriteString(item.ToRESP())
 	}
-	return s
+	return sb.String()
 }
