@@ -1,7 +1,6 @@
 package command
 
 import (
-	"errors"
 	"strconv"
 	"strings"
 	"time"
