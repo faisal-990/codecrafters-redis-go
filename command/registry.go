@@ -10,10 +10,11 @@ import (
 type Handler func(cmd *resp.Command) resp.Resp
 
 var cmdTable = map[string]Handler{
-	"ECHO": EchoHandler,
-	"PING": PingHandler,
-	"SET":  SetHandler,
-	"GET":  GetHandler,
+	"ECHO":  EchoHandler,
+	"PING":  PingHandler,
+	"SET":   SetHandler,
+	"GET":   GetHandler,
+	"RPUSH": RpushHandler,
 }
 
 func Dispatch(cmd *resp.Command) resp.Resp {

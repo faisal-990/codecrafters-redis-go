@@ -38,3 +38,9 @@ func (s SimpleString) ToRESP() string {
 type RespError string
 
 func (e RespError) ToRESP() string { return "-" + string(e) + "\r\n" }
+
+type Integer string
+
+func (i Integer) ToRESP() string {
+	return ":" + string(i) + "\r\n"
+}

@@ -1,6 +1,7 @@
 package command
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -60,4 +61,18 @@ func GetHandler(cmd *resp.Command) resp.Resp {
 		return resp.RespError("ERR- failed to get the value using the key")
 	}
 	return resp.BulkString{V: &(value)}
+}
+
+func RpushHandler(cmd *resp.Command) resp.Resp {
+	key := cmd.Args[1]
+	values := cmd.Args[1:]
+
+	length, err := db.Instance.Rpush(key, values)
+	if err != nil {
+		if strings.HasPrefix(err.Error(), "WRONGTYPE") {
+			return resp.RespError("WRONGTYPE Operation against a key holding the wrong kind of value")
+		}
+		return resp.RespError(err.Error())
+	}
+	return resp.Integer(fmt.Sprintf("%d", length))
 }
