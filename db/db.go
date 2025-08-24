@@ -133,7 +133,9 @@ func (d *DB) Lpush(key string, value []string) (int, error) {
 		}
 	}
 
-	d.lists[key] = append(value, d.lists[key]...)
+	for i := len(value) - 1; i >= 0; i-- {
+		d.lists[key] = append([]string{value[i]}, d.lists[key]...)
+	}
 
 	return len(d.lists[key]), nil
 }
