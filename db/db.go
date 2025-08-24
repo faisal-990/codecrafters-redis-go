@@ -11,6 +11,7 @@ type Storage interface {
 	Get(key string) (string, error)
 	Rpush(key string, value []string) (int, error)
 	Lrange(key, start, stop string) ([]string, error)
+	Lpush(key string, value []string) (int, error)
 }
 
 // entry represents a single key's value + expiration (for string keys)
@@ -119,4 +120,20 @@ func (d *DB) Lrange(key string, start, stop int) ([]string, error) {
 	}
 
 	return list[start : stop+1], nil
+}
+
+func (d *DB) Lpush(key string, value []string) (int, error) {
+	if e, ok := d.data[key]; ok {
+		if !e.expiration.IsZero() && time.Now().After(e.expiration) {
+			// the key was of type string , but now it has been expired so you can use it
+			delete(d.data, key)
+		} else {
+			// the key is valid string type and not lists type
+			return 0, errors.New("WRONGTYPE Operation against a key holding the wrong kind of value")
+		}
+	}
+
+	d.lists[key] = append(value, d.lists[key]...)
+
+	return len(d.lists[key]), nil
 }

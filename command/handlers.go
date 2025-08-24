@@ -105,3 +105,16 @@ func LrangeHandler(cmd *resp.Command) resp.Resp {
 
 	return resp.RespArray{V: arr}
 }
+
+func LpushHandler(cmd *resp.Command) resp.Resp {
+	key := cmd.Args[0]
+	values := cmd.Args[1:]
+	length, err := db.Instance.Lpush(key, values)
+	if err != nil {
+		if strings.HasPrefix(err.Error(), "WRONGTYPE") {
+			return resp.RespError("WRONGTYPE Operation against a key holding the wrong kind of value")
+		}
+		return resp.RespError(err.Error())
+	}
+	return resp.Integer(strconv.Itoa(length))
+}

@@ -16,6 +16,7 @@ var cmdTable = map[string]Handler{
 	"GET":    GetHandler,
 	"RPUSH":  RpushHandler,
 	"LRANGE": LrangeHandler,
+	"LPUSH":  LpushHandler,
 }
 
 func Dispatch(cmd *resp.Command) resp.Resp {
