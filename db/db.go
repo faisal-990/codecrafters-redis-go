@@ -10,6 +10,7 @@ type Storage interface {
 	Set(key, value string, ttl time.Duration) error
 	Get(key string) (string, error)
 	Rpush(key string, value []string) (int, error)
+	Lrange(key, start, stop string) ([]string, error)
 }
 
 // entry represents a single key's value + expiration (for string keys)
@@ -88,4 +89,34 @@ func (d *DB) Rpush(key string, value []string) (int, error) {
 	// Append to existing list (or create a new one)
 	d.lists[key] = append(d.lists[key], value...)
 	return len(d.lists[key]), nil
+}
+
+func (d *DB) Lrange(key string, start, stop int) ([]string, error) {
+	list, ok := d.lists[key]
+	if !ok {
+		return nil, errors.New("key not found")
+	}
+
+	length := len(list)
+
+	// handle negative indices (like Redis)
+	if start < 0 {
+		start = length + start
+	}
+	if stop < 0 {
+		stop = length + stop
+	}
+
+	// clamp indices
+	if start < 0 {
+		start = 0
+	}
+	if stop >= length {
+		stop = length - 1
+	}
+	if start > stop || start >= length {
+		return []string{}, nil
+	}
+
+	return list[start : stop+1], nil
 }

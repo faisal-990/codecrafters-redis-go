@@ -75,3 +75,29 @@ func RpushHandler(cmd *resp.Command) resp.Resp {
 	}
 	return resp.Integer(strconv.Itoa(length))
 }
+
+func LrangeHandler(cmd *resp.Command) resp.Resp {
+	key := cmd.Args[0]
+	start, err := strconv.Atoi(cmd.Args[1])
+	if err != nil {
+		return resp.RespError("ERR - value is not an integer or out of range")
+	}
+	stop, err := strconv.Atoi(cmd.Args[2])
+	if err != nil {
+		return resp.RespError("ERR - value is not an integer or out of range")
+	}
+
+	values, err := db.Instance.Lrange(key, start, stop)
+	if err != nil {
+		return resp.RespError(err.Error())
+	}
+
+	// convert []string -> []Resp (BulkString)
+	arr := make([]resp.Resp, len(values))
+	for i, v := range values {
+		val := v // capture for pointer
+		arr[i] = resp.BulkString{V: &val}
+	}
+
+	return resp.RespArray{V: arr}
+}

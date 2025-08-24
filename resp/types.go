@@ -44,3 +44,15 @@ type Integer string
 func (i Integer) ToRESP() string {
 	return ":" + string(i) + "\r\n"
 }
+
+type RespArray struct {
+	V []Resp
+}
+
+func (r RespArray) ToRESP() string {
+	s := fmt.Sprintf("*%d\r\n", len(r.V))
+	for _, v := range r.V {
+		s += v.ToRESP()
+	}
+	return s
+}
