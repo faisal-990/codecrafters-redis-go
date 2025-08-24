@@ -133,8 +133,9 @@ func (d *DB) Lpush(key string, value []string) (int, error) {
 		}
 	}
 
-	for i := len(value) - 1; i >= 0; i-- {
-		d.lists[key] = append(d.lists[key], value[i])
+	// Insert each value at the **start** of the slice
+	for i := 0; i < len(value); i++ {
+		d.lists[key] = append([]string{value[i]}, d.lists[key]...)
 	}
 
 	return len(d.lists[key]), nil
