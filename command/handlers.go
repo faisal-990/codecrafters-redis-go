@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"strconv"
 	"strings"
 	"time"
@@ -115,6 +116,17 @@ func LpushHandler(cmd *resp.Command) resp.Resp {
 			return resp.RespError("WRONGTYPE Operation against a key holding the wrong kind of value")
 		}
 		return resp.RespError(err.Error())
+	}
+	return resp.Integer(strconv.Itoa(length))
+}
+
+func LlenHandler(cmd *resp.Command) resp.Resp {
+	key := cmd.Args[0]
+	length, err := db.Instance.Llen(key)
+	if err != nil {
+		if strings.HasPrefix(err.Error(), "WRONGTYPE") {
+			return resp.RespError("WRONGTYPE Operatiion is being performed against an element of non list type")
+		}
 	}
 	return resp.Integer(strconv.Itoa(length))
 }

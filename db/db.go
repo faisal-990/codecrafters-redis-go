@@ -12,6 +12,7 @@ type Storage interface {
 	Rpush(key string, value []string) (int, error)
 	Lrange(key, start, stop string) ([]string, error)
 	Lpush(key string, value []string) (int, error)
+	Llen(key string) (int, error)
 }
 
 // entry represents a single key's value + expiration (for string keys)
@@ -138,5 +139,16 @@ func (d *DB) Lpush(key string, value []string) (int, error) {
 		d.lists[key] = append([]string{value[i]}, d.lists[key]...)
 	}
 
+	return len(d.lists[key]), nil
+}
+
+func (d *DB) Llen(key string) (int, error) {
+	if e, ok := d.data[key]; ok {
+		if !e.expiration.IsZero() && time.Now().After(e.expiration) {
+			delete(d.data, key)
+		} else {
+			return 0, errors.New("WRONGTYPE Operation not permitted on a non list entity")
+		}
+	}
 	return len(d.lists[key]), nil
 }
