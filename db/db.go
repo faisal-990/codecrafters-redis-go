@@ -13,6 +13,7 @@ type Storage interface {
 	Lrange(key, start, stop string) ([]string, error)
 	Lpush(key string, value []string) (int, error)
 	Llen(key string) (int, error)
+	Lpop(key string) (string, error)
 }
 
 // entry represents a single key's value + expiration (for string keys)
@@ -151,4 +152,17 @@ func (d *DB) Llen(key string) (int, error) {
 		}
 	}
 	return len(d.lists[key]), nil
+}
+
+func (d *DB) Lpop(key string) (string, error) {
+	// if the key is empty or is not a list simply return nil reply
+	// if the key is valid delete and return the first element from the list
+	list, ok := d.lists[key]
+	if !ok || len(list) == 0 {
+		return "", nil // nil reply
+	}
+
+	element := list[0]
+	d.lists[key] = list[1:] // shrink slice, removing first element
+	return element, nil
 }

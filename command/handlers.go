@@ -1,6 +1,7 @@
 package command
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -128,4 +129,16 @@ func LlenHandler(cmd *resp.Command) resp.Resp {
 		}
 	}
 	return resp.Integer(strconv.Itoa(length))
+}
+
+func LpopHandler(cmd *resp.Command) resp.Resp {
+	key := cmd.Args[0]
+	element, err := db.Instance.Lpop(key)
+	if element == "" {
+		return resp.BulkString{V: nil}
+	}
+	if err != nil {
+		return resp.RespError(fmt.Sprintf("ERR - %s", err))
+	}
+	return resp.BulkString{V: &element}
 }
