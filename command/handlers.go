@@ -65,7 +65,10 @@ func GetHandler(cmd *resp.Command) resp.Resp {
 
 func RpushHandler(cmd *resp.Command) resp.Resp {
 	key := cmd.Args[0]
-	values := cmd.Args[1:]
+	var values []string
+	if len(cmd.Args) > 1 {
+		values = cmd.Args[1:]
+	}
 
 	length, err := db.Instance.Rpush(key, values)
 	if err != nil {
@@ -132,13 +135,34 @@ func LlenHandler(cmd *resp.Command) resp.Resp {
 }
 
 func LpopHandler(cmd *resp.Command) resp.Resp {
+	if len(cmd.Args) < 1 {
+		return resp.RespError("ERR wrong number of arguments for 'lpop'")
+	}
+
 	key := cmd.Args[0]
-	element, err := db.Instance.Lpop(key)
-	if element == "" {
-		return resp.BulkString{V: nil}
+	var count string
+	if len(cmd.Args) > 1 {
+		count = cmd.Args[1]
 	}
+
+	elements, err := db.Instance.Lpop(key, count)
 	if err != nil {
-		return resp.RespError(fmt.Sprintf("ERR - %s", err))
+		return resp.RespError(fmt.Sprintf("ERR %s", err.Error()))
 	}
-	return resp.BulkString{V: &element}
+
+	// If count was given, reply as Array
+	if count != "" {
+		arr := make([]resp.Resp, len(elements))
+		for i, v := range elements {
+			arr[i] = resp.BulkString{V: &v}
+		}
+		return resp.RespArray{V: arr}
+	}
+
+	// No count → expect single element
+	if len(elements) == 0 {
+		return resp.BulkString{V: nil} // nil bulk string if empty
+	}
+
+	return resp.BulkString{V: &elements[0]}
 }

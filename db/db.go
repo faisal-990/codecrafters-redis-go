@@ -2,6 +2,7 @@ package db
 
 import (
 	"errors"
+	"strconv"
 	"time"
 )
 
@@ -154,15 +155,40 @@ func (d *DB) Llen(key string) (int, error) {
 	return len(d.lists[key]), nil
 }
 
-func (d *DB) Lpop(key string) (string, error) {
-	// if the key is empty or is not a list simply return nil reply
-	// if the key is valid delete and return the first element from the list
-	list, ok := d.lists[key]
-	if !ok || len(list) == 0 {
-		return "", nil // nil reply
+func (d *DB) Lpop(key string, countStr string) ([]string, error) {
+	// single-element LPOP (no count)
+	if countStr == "" {
+		list, ok := d.lists[key]
+		if !ok || len(list) == 0 {
+			return nil, nil // nil reply
+		}
+		element := list[0]
+		d.lists[key] = list[1:] // remove first
+		return []string{element}, nil
 	}
 
-	element := list[0]
-	d.lists[key] = list[1:] // shrink slice, removing first element
-	return element, nil
+	// multi-element LPOP with count
+	n, err := strconv.Atoi(countStr)
+	if err != nil {
+		return nil, errors.New("WRONGTYPE ERR -value is not an integer or out of range")
+	}
+	if n < 0 {
+		return nil, errors.New("NEGATIVE ERR- value must be positive")
+	}
+	if n == 0 {
+		return []string{}, nil
+	}
+
+	values, ok := d.lists[key]
+	if !ok || len(values) == 0 {
+		return []string{}, nil
+	}
+	if n >= len(values) {
+		res := values
+		delete(d.lists, key) // list consumed
+		return res, nil
+	}
+	res := values[:n]
+	d.lists[key] = values[n:]
+	return res, nil
 }
